@@ -1,0 +1,748 @@
+<odoo>
+
+    <record model="ir.ui.view" id="view_kanban_account_analytic_line_inherit">
+        <field name="name">view.kanban.account.analytic.line.inherit</field>
+        <field name="model">account.analytic.line</field>
+        <field name="inherit_id" ref="hr_timesheet.view_kanban_account_analytic_line"/>
+        <field name="arch" type="xml">
+
+            <t t-esc="record.name.value" position="replace">
+                <field name="name" widget="html"/>
+            </t>
+
+        </field>
+    </record>
+
+    <record model="ir.ui.view" id="view_task_kanban_inherit">
+        <field name="name">project.task.kanban.inherit</field>
+        <field name="model">project.task</field>
+        <field name="inherit_id" ref="project.view_task_kanban"/>
+        <field name="arch" type="xml">
+
+            <field name="activity_state" position="after">
+                <field name="key"/>
+            </field>
+
+            <strong class="o_kanban_record_title" position="replace">
+                <strong class="o_kanban_record_title"><t t-if="record.key.value">[<field name="key"/>] </t><field name="name"/></strong>
+            </strong>
+
+        </field>
+    </record>
+
+    <record id="project_view_kanban_inherit" model="ir.ui.view">
+        <field name="name">project.project.kanban.inherit</field>
+        <field name="model">project.project</field>
+        <field name="inherit_id" ref="project.project_view_kanban"/>
+        <field name="arch" type="xml">
+
+            <field name="user_id" position="after">
+                <field name="key"/>
+            </field>
+
+            <strong position="replace">
+                <strong><t t-if="record.key.value">[<field name="key"/>] </t><field name="name" string="Project Name"/></strong>
+            </strong>
+
+        </field>
+    </record>
+
+    <record id="act_project_project_2_sprint_all" model="ir.actions.act_window">
+        <field name="name">Sprints</field>
+        <field name="res_model">jira.sprint</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[('project_ids', '=', active_id)]</field>
+    </record>
+
+    <record model="ir.ui.view" id="view_project_kanban_inherit">
+        <field name="name">project.project.kanban</field>
+        <field name="model">project.project</field>
+        <field name="inherit_id" ref="project.view_project_kanban"/>
+        <field name="priority" eval="0"/>
+        <field name="arch" type="xml">
+
+            <field name="alias_domain" position="after">
+                <field name="key"/>
+                <field name="sprint_count"/>
+            </field>
+
+            <!-- <t t-esc="record.name.value"/> -->
+            <xpath expr="//t[@t-esc='record.name.value']/.." position="replace">
+                <span><t t-if="record.key.value">[<field name="key"/>] </t><t t-esc="record.name.value"/></span>
+            </xpath>
+
+            <div class="o_project_kanban_boxes" position="inside">
+                <a class="o_project_kanban_box" name="%(act_project_project_2_sprint_all)d" type="action">
+                    <div>
+                        <span class="o_value"><t t-esc="record.sprint_count.value"/></span>
+                        <span class="o_label">Sprints</span>
+                    </div>
+                </a>
+            </div>
+
+            <a class="o_project_kanban_box" position="replace">
+                <a class="o_project_kanban_box" name="%(project.act_project_project_2_project_task_all)d" type="action">
+                    <div>
+                        <span class="o_value">
+                            <t t-esc="record.task_count.value"/>
+                        </span>
+                        <span class="o_label">
+                            <t t-esc="record.label_tasks.value"/>
+                        </span>
+                    </div>
+                </a>
+                <a t-if="record.task_needaction_count.raw_value" name="%(project.act_project_project_2_project_task_all)d"
+                   type="action" class="o_project_kanban_box" context="{'search_default_message_needaction': 1}">
+                    <div>
+                        <span title='Unread Messages'>
+                            <i class='fa fa-comments'/>
+                            <t t-raw="record.task_needaction_count.raw_value"/>
+                        </span>
+                    </div>
+                </a>
+            </a>
+
+        </field>
+    </record>
+
+    <record id="view_task_search_form_inherit" model="ir.ui.view">
+        <field name="name">project.task.search.form.inherit</field>
+        <field name="model">project.task</field>
+        <field name="inherit_id" ref="project.view_task_search_form"/>
+        <field name="arch" type="xml">
+
+            <field name="name" position="attributes">
+                <attribute name="filter_domain">['|', ('name', 'ilike', self), ('key', 'ilike', self)]</attribute>
+            </field>
+
+        </field>
+    </record>
+
+    <record id="view_project_project_filter_inherit" model="ir.ui.view">
+        <field name="name">project.project.select.inherit</field>
+        <field name="model">project.project</field>
+        <field name="inherit_id" ref="project.view_project_project_filter"/>
+        <field name="arch" type="xml">
+
+            <field name="name" position="attributes">
+                <attribute name="filter_domain">['|', ('name', 'ilike', self), ('key', 'ilike', self)]</attribute>
+            </field>
+
+        </field>
+    </record>
+
+    <record id="view_project_inherit" model="ir.ui.view">
+        <field name="name">project.project.tree.inherit</field>
+        <field name="model">project.project</field>
+        <field name="inherit_id" ref="project.view_project"/>
+        <field name="arch" type="xml">
+
+            <field name="name" position="before">
+                <field name="key"/>
+            </field>
+
+        </field>
+    </record>
+
+    <record id="edit_project_inherit" model="ir.ui.view">
+        <field name="name">project.project.form.inherit</field>
+        <field name="model">project.project</field>
+        <field name="inherit_id" ref="project.edit_project"/>
+        <field name="arch" type="xml">
+
+            <h1 position="after">
+                <h3>Key: <field name="key" class="oe_inline" attrs="{'required': [('jira_project', '=', True)]}"/></h3>
+            </h1>
+
+            <div class="oe_button_box" position="inside">
+                <button class="oe_stat_button" type="action" name="%(act_project_project_2_sprint_all)d" icon="fa-tasks">
+                    <field string="Sprints" name="sprint_count" widget="statinfo"/>
+                </button>
+            </div>
+
+            <page position="before">
+                <page string="Description">
+                    <field name="description"/>
+                </page>
+                <page string="Stages">
+                    <field name="type_ids" readonly="1"/>
+                </page>
+            </page>
+
+            <field name="user_id" position="replace"/>
+
+            <div class="oe_title" position="after">
+                <group>
+                    <group>
+                        <field name="id" invisible="1"/>
+                        <field name="jira_project"/>
+                        <field name="user_id" required="1"/>
+                        <field name="url"/>
+                        <field name="project_type_id" attrs="{'required': [('jira_project', '=', True)],
+                                                              'invisible': [('jira_project', '=', False)]}"
+                               options="{'no_create': 1, 'no_create_edit': 1}"/>
+                        <field name="project_template_id" attrs="{'required': [('jira_project', '=', True), ('id', '=', False)],
+                                                                  'invisible': [('jira_project', '=', False)]}"
+                               options="{'no_create': 1, 'no_create_edit': 1}"
+                               domain="[('project_type_id', '=', project_type_id)]"/>
+                        <field name="category_id"/>
+                    </group>
+                    <group>
+
+                    </group>
+                </group>
+                <group>
+                    <field name="component_ids" widget="many2many_tags" options="{'no_create_edit': 1}"
+                           domain="[('project_id', '=', active_id)]" context="{'default_project_id': active_id}"/>
+                    <field name="issue_type_ids" widget="many2many_tags" options="{'no_create_edit': 1, 'no_open': 1}" readonly="1"/>
+                    <field name="version_ids" widget="many2many_tags" options="{'no_create_edit': 1}"
+                           domain="[('project_id', '=', active_id)]" context="{'default_project_id': active_id}"/>
+                </group>
+            </div>
+
+        </field>
+    </record>
+
+    <record id="project_task_action_epic_task" model="ir.actions.act_window">
+        <field name="name">Sprints</field>
+        <field name="res_model">project.task</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[('epic_id', '=', active_id)]</field>
+    </record>
+
+    <record id="view_task_form2_inherit" model="ir.ui.view">
+        <field name="name">project.task.form.inherit</field>
+        <field name="model">project.task</field>
+        <field name="inherit_id" ref="project.view_task_form2"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//header/button" position="after">
+                <button name="update_jira" string="Update Jira" type="object"
+                        attrs="{'invisible': [('jira_project', '=', False)]}"/>
+            </xpath>
+
+            <field name="parent_id" position="replace"/>
+
+            <field name="user_id" position="replace">
+                <field name="issue_type_ids" invisible="1" readonly="1"/>
+                <field name="issue_type_id" attrs="{'required': [('jira_project', '=', True)]}"
+                       domain="[('id', 'in', issue_type_ids)]"
+                       options="{'no_create': 1, 'no_edit': 1}"/>
+                <field name="parent_id" attrs="{'invisible': [('is_subtask', '=', False)], 'required': [('is_subtask', '=', True)]}"
+                       domain="[('project_id', '=', project_id)]" options="{'no_create': 1, 'no_create_edit': 1}"/>
+                <field name="jira_project" invisible="1" readonly="1"/>
+                <field name="is_epic" invisible="1"/>
+                <field name="is_subtask" invisible="1"/>
+                <field name="priority_id" required="1" options="{'no_create': 1, 'no_create_edit': 1}"/>
+                <field name="creator_id" options="{'no_create': 1, 'no_create_edit': 1}"/>
+                <field name="user_id" required="1" options="{'no_create': 1, 'no_create_edit': 1}"/>
+                <field name="reporter_id" required="1" options="{'no_create': 1, 'no_create_edit': 1}"/>
+                <field name="epic_id" attrs="{'invisible': [('is_epic', '=', True)]}"
+                       domain="[('project_id', '=', project_id), ('is_epic', '=', True)]"
+                       options="{'no_create_edit': 1}"/>
+                <field name="sprint_ids" domain="[('project_ids', '=', project_id)]"
+                       options="{'no_create_edit': 1}" widget="many2many_tags"/>
+            </field>
+
+            <button name="%(project.project_task_action_sub_task)d" position="attributes">
+                <attribute name="groups"/>
+            </button>
+
+            <h1 position="after">
+                <h3>Key: <field name="key" class="oe_inline" readonly="1"/></h3>
+            </h1>
+
+            <field name="project_id" position="attributes">
+                <attribute name="required">1</attribute>
+            </field>
+
+            <field name="date_last_stage_update" position="after">
+                <field name="jira_create" readonly="1"/>
+                <field name="jira_update" readonly="1"/>
+            </field>
+
+            <div class="oe_button_box" position="inside">
+                <button name="%(project_task_action_epic_task)d" type="action" class="oe_stat_button" icon="fa-tasks"
+                        attrs="{'invisible' : [('is_epic', '=', False)]}"
+                        context="{'project_id': project_id}">
+                    <field string="Epic Issues" name="epic_issues_count" widget="statinfo"/>
+                </button>
+            </div>
+
+            <field name="tag_ids" position="after">
+                <field name="resolution_date" readonly="1" attrs="{'invisible': [('resolution_date', '=', False)]}"/>
+                <field name="resolution_id"/>
+                <field name="version_ids" widget="many2many_tags" context="{'default_project_id': project_id}"
+                       domain="[('project_id', '=', project_id)]"/>
+                <field name="fix_version_ids" widget="many2many_tags" context="{'default_project_id': project_id}"
+                       domain="[('project_id', '=', project_id)]"/>
+                <field name="component_ids" widget="many2many_tags" context="{'default_project_id': project_id}"
+                       domain="[('project_id', '=', project_id)]"/>
+            </field>
+
+            <page name="extra_info" position="inside">
+                <label for="link_ids"/>
+                <field name="link_ids" context="{'default_task_id': active_id,
+                                                 'project_id': project_id}">
+                    <tree editable="bottom">
+                        <field name="jira_id" invisible="1"/>
+                        <field name="link_name" options="{'no_create': 1, 'no_create_edit': 1, 'limit': 15}"
+                               domain="[('show', '=', True)]" attrs="{'readonly': [('jira_id', '!=', False)]}"/>
+                        <field name="linked_task_id" options="{'no_create': 1, 'no_create_edit': 1, 'limit': 15}"
+                               required="1" attrs="{'readonly': [('jira_id', '!=', False)]}"
+                               domain="[('project_id', '=', context.get('project_id', False)), ('id', '!=', parent.id)]"/>
+                        <field name="task_id" invisible="1"/>
+                        <field name="link_id" invisible="1"/>
+                    </tree>
+                </field>
+            </page>
+
+        </field>
+    </record>
+
+    <record id="view_task_tree2_inherit" model="ir.ui.view">
+        <field name="name">view_task_tree2_inherit</field>
+        <field name="model">project.task</field>
+        <field name="inherit_id" ref="project.view_task_tree2"/>
+        <field name="priority" eval="1000"/>
+        <field name="arch" type="xml">
+
+            <field name="date_deadline" position="after">
+                <field name="sprint_ids" widget="many2many_tags"/>
+                <field name="epic_id"/>
+            </field>
+
+            <field name="name" position="before">
+                <field name="key"/>
+            </field>
+
+            <field name="user_id" position="after">
+                <field name="issue_type_id"/>
+                <field name="priority_id"/>
+            </field>
+
+        </field>
+    </record>
+
+    <record id="hr_timesheet_line_tree_inherit" model="ir.ui.view">
+        <field name="name">hr_timesheet_line_tree_inherit</field>
+        <field name="model">account.analytic.line</field>
+        <field name="inherit_id" ref="hr_timesheet.hr_timesheet_line_tree"/>
+        <field name="arch" type="xml">
+            <field name="name" position="before">
+                <field name="employee_id"/>
+            </field>
+        </field>
+    </record>
+
+    <record id="project_project_view_form_simplified_inherit" model="ir.ui.view">
+        <field name="name">project.project.view.form.simplified.inherit</field>
+        <field name="model">project.project</field>
+        <field name="inherit_id" ref="project.project_project_view_form_simplified"/>
+        <field name="priority" eval="1000"/>
+        <field name="arch" type="xml">
+
+            <field name="allow_timesheets" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </field>
+
+            <field name="user_id" position="replace"/>
+
+            <field name="name" position="replace">
+                <field name="name" string="Name"/>
+                <field name="key" required="1"/>
+                <field name="jira_project"/>
+                <field name="project_type_id" required="1" options="{'no_create': 1, 'no_create_edit': 1, 'no_open': 1}"
+                       attrs="{'invisible': [('jira_project', '=', False)],
+                               'required': [('jira_project', '!=', False)]}"/>
+                <field name="project_template_id" required="1" options="{'no_create': 1, 'no_create_edit': 1, 'no_open': 1}"
+                       domain="[('project_type_id', '=', project_type_id)]"
+                       attrs="{'invisible': [('jira_project', '=', False)],
+                               'required': [('jira_project', '!=', False)]}"/>
+                <field name="user_id" required="1" options="{'no_create': 1, 'no_create_edit': 1, 'no_open': 1}"/>
+                <field name="url"/>
+                <field name="category_id" options="{'no_create': 1, 'no_create_edit': 1, 'no_open': 1}"
+                       attrs="{'invisible': [('jira_project', '=', False)]}"/>
+                <field name="description"/>
+            </field>
+
+            <!--<form string="Project">-->
+                <!--<sheet>-->
+                    <!--<group>-->
+                        <!--<group>-->
+                            <!--<field name="name" class="o_project_name oe_inline"-->
+                                   <!--string="Project Name" placeholder="e.g. Office Party"/>-->
+                            <!--<label for="alias_name" string="Choose a Project Email"-->
+                                   <!--attrs="{'invisible': [('alias_domain', '=', False)]}"/>-->
+                            <!--<div name="alias_def" attrs="{'invisible': [('alias_domain', '=', False)]}">-->
+                                <!--<field name="alias_name" class="oe_inline"/>@-->
+                                <!--<field name="alias_domain" class="oe_inline" readonly="1"/>-->
+                            <!--</div>-->
+                            <!--<field name="user_id" invisible="1"/>-->
+                        <!--</group>-->
+                    <!--</group>-->
+                    <!--<footer>-->
+                        <!--<button string="Create" name="close_dialog" type="object" class="btn-primary"/>-->
+                        <!--<button string="Create &amp; Edit" name="edit_dialog" type="object" class="btn-primary"/>-->
+                        <!--<button string="Discard" class="btn-default" special="cancel"/>-->
+                    <!--</footer>-->
+                <!--</sheet>-->
+            <!--</form>-->
+        </field>
+    </record>
+
+    <menuitem id="jira_project_menu" name="Jira" parent="project.menu_main_pm" sequence="90"/>
+
+    <record id="jira_settings_form" model="ir.ui.view">
+        <field name="name">jira_settings_form</field>
+        <field name="model">jira.settings</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="test_connection" string="Test Conection" type="object" class="oe_highlight"/>
+
+                    <button name="update_jira" string="Update Field" type="object" class="oe_highlight" context="{'update': 'jira.field'}"/>
+                    <button name="update_jira" string="Update Filter" type="object" class="oe_highlight" context="{'update': 'jira.filter'}"/>
+
+                    <button name="update_jira" string="Update User" type="object" class="oe_highlight" context="{'update': 'res.users'}"/>
+
+                    <button name="update_jira" string="Update Project Category" type="object" class="oe_highlight" context="{'update': 'jira.project.category'}"/>
+                    <button name="update_jira" string="Update Project Component" type="object" class="oe_highlight" context="{'update': 'jira.project.component'}"/>
+                    <button name="update_jira" string="Update Project Template" type="object" class="oe_highlight" context="{'update': 'jira.project.template'}"/>
+                    <button name="update_jira" string="Update Project Type" type="object" class="oe_highlight" context="{'update': 'jira.project.type'}"/>
+                    <button name="update_jira" string="Update Project" type="object" class="oe_highlight" context="{'update': 'project.project'}"/>
+
+                    <button name="update_jira" string="Update Issue Priority" type="object" class="oe_highlight" context="{'update': 'jira.issue.priority'}"/>
+                    <button name="update_jira" string="Update Issue Resolution" type="object" class="oe_highlight" context="{'update': 'jira.issue.resolution'}"/>
+                    <button name="update_jira" string="Update Issue Status Category" type="object" class="oe_highlight" context="{'update': 'jira.issue.status.category'}"/>
+                    <button name="update_jira" string="Update Issue Status" type="object" class="oe_highlight" context="{'update': 'project.task.type'}"/>
+                    <button name="update_jira" string="Update Issue Type" type="object" class="oe_highlight" context="{'update': 'jira.issue.type'}"/>
+                    <button name="update_jira" string="Update Issue Link Type" type="object" class="oe_highlight" context="{'update': 'jira.issue.link.type'}"/>
+                    <button name="update_jira" string="Update Issue (ALL)" type="object" class="oe_highlight" context="{'update': 'project.task'}"/>
+                    <button name="jira_get_last_day" string="Update Issue (LAST DAY)" type="object" class="oe_highlight"/>
+
+                    <button name="update_jira" string="Update Board/Sprint" type="object" class="oe_highlight" context="{'update': 'jira.board'}"/>
+
+                    <button name="update_jira" string="Update All Data" type="object" class="oe_highlight"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group string="Jira Connection settings">
+                            <field name="url" required="1"/>
+                            <field name="login" required="1"/>
+                            <field name="password" required="1" password="True"/>
+                            <field name="updated" required="1"/>
+                            <field name="download_attachments"/>
+                            <field name="disable_sending_data"/>
+                            <field name="use_tempo_timesheets"/>
+                        </group>
+                        <group>
+
+                        </group>
+                    </group>
+                    <group>
+                        <group string="Cron settings">
+                            <field name="cron_active" required="1"/>
+                            <field name="interval_number" required="1"/>
+                            <field name="interval_type" required="1"/>
+                            <field name="nextcall" required="1"/>
+                        </group>
+                        <group>
+
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="jira_settings_action" model="ir.actions.act_window">
+        <field name="name">Jira Settings</field>
+        <field name="res_model">jira.settings</field>
+        <field name="view_mode">form</field>
+        <field name="res_id" ref="jira_settings_record"/>
+    </record>
+
+    <menuitem id="jira_settings_menu" name="Settings" sequence="0" action="jira_settings_action" parent="jira_project_menu"/>
+
+    <record id="jira_project_version_tree" model="ir.ui.view">
+        <field name="name">jira_project_version_tree</field>
+        <field name="model">jira.project.version</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="project_id"/>
+                <field name="name"/>
+                <field name="description"/>
+                <field name="jira_id"/>
+                <field name="archived"/>
+                <field name="released"/>
+                <field name="release_date"/>
+                <field name="overdue"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="jira_project_version_form" model="ir.ui.view">
+        <field name="name">jira_project_version_form</field>
+        <field name="model">jira.project.version</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="project_id"/>
+                            <field name="name"/>
+                            <field name="description"/>
+                            <field name="jira_id"/>
+                            <field name="archived"/>
+                            <field name="released"/>
+                            <field name="release_date"/>
+                            <field name="overdue"/>
+                        </group>
+                        <group>
+
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="jira_project_version_action" model="ir.actions.act_window">
+        <field name="name">Jira Project Version</field>
+        <field name="res_model">jira.project.version</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <!--<menuitem id="jira_project_menu_versions" name="Versions" sequence="1" action="jira_project_version_action" parent="jira_project_menu"/>-->
+
+    <record id="jira_board_tree" model="ir.ui.view">
+        <field name="name">jira_board_tree</field>
+        <field name="model">jira.board</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="type"/>
+                <field name="project_ids" widget="many2many_tags"/>
+                <field name="sprint_ids" widget="many2many_tags"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="jira_board_form" model="ir.ui.view">
+        <field name="name">jira_board_form</field>
+        <field name="model">jira.board</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="type"/>
+                            <field name="project_id"/>
+                            <field name="filter_id"/>
+                        </group>
+                        <group>
+
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Projects">
+                            <field name="project_ids"/>
+                        </page>
+                        <page string="Sprints">
+                            <field name="sprint_ids"/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="jira_board_action" model="ir.actions.act_window">
+        <field name="name">Jira Board</field>
+        <field name="res_model">jira.board</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <!--<menuitem name="Jira Board" id="jira_board" parent="jira_project_menu" action="jira_board_action" sequence="2"/>-->
+
+    <record id="jira_filter_tree" model="ir.ui.view">
+        <field name="name">jira_filter_tree</field>
+        <field name="model">jira.filter</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="query"/>
+                <field name="owner_id"/>
+                <field name="description"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="jira_filter_form" model="ir.ui.view">
+        <field name="name">jira_filter_form</field>
+        <field name="model">jira.filter</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="query"/>
+                            <field name="owner_id"/>
+                            <field name="description"/>
+                        </group>
+                        <group/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="jira_filter_action" model="ir.actions.act_window">
+        <field name="name">Jira Filter</field>
+        <field name="res_model">jira.filter</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <!--<menuitem name="Jira Filter" id="jira_filter" parent="jira_project_menu" action="jira_filter_action" sequence="3"/>-->
+
+    <record id="jira_sprint_tree" model="ir.ui.view">
+        <field name="name">jira_sprint_tree</field>
+        <field name="model">jira.sprint</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="state"/>
+                <field name="goal"/>
+                <field name="project_ids" widget="many2many_tags"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="jira_sprint_form" model="ir.ui.view">
+        <field name="name">jira_sprint_form</field>
+        <field name="model">jira.sprint</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="update_boards" string="Update Boards" action="object"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="id" invisible="1"/>
+                            <field name="name" required="1"/>
+                            <field name="board_id" attrs="{'required': [('id', '=', False)],
+                                                           'invisible': [('id', '!=', False)]}"
+                                   options="{'no_create': 1, 'no_create_edit': 1}"/>
+                            <field name="goal"/>
+                        </group>
+                        <group/>
+                    </group>
+                    <notebook>
+                        <page string="Tasks">
+                            <field name="issue_ids"/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="jira_sprint_action" model="ir.actions.act_window">
+        <field name="name">Jira Sprint</field>
+        <field name="res_model">jira.sprint</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <!--<menuitem name="Jira Sprint" id="jira_sprint" parent="jira_project_menu" action="jira_sprint_action" sequence="4"/>-->
+
+    <record id="jira_sprint_tree" model="ir.ui.view">
+        <field name="name">jira_sprint_tree</field>
+        <field name="model">jira.sprint</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="state"/>
+                <field name="goal"/>
+                <field name="project_ids" widget="many2many_tags"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="jira_sprint_form" model="ir.ui.view">
+        <field name="name">jira_sprint_form</field>
+        <field name="model">jira.sprint</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="update_boards" string="Update Boards" action="object"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="id" invisible="1"/>
+                            <field name="name" required="1"/>
+                            <field name="board_id" attrs="{'required': [('id', '=', False)],
+                                                           'invisible': [('id', '!=', False)]}"
+                                   options="{'no_create': 1, 'no_create_edit': 1}"/>
+                            <field name="goal"/>
+                        </group>
+                        <group/>
+                    </group>
+                    <notebook>
+                        <page string="Tasks">
+                            <field name="issue_ids"/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="jira_issue_link_type_tree" model="ir.ui.view">
+        <field name="name">jira_issue_link_type_tree</field>
+        <field name="model">jira.issue.link.type</field>
+        <field name="arch" type="xml">
+            <tree editable="bottom">
+                <field name="name"/>
+                <field name="inward" context="{'default_type': 'inward'}"/>
+                <field name="outward" context="{'default_type': 'outward'}"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="jira_issue_link_type_action" model="ir.actions.act_window">
+        <field name="name">Issue Link Type</field>
+        <field name="res_model">jira.issue.link.type</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <!--<menuitem name="Issue Link Type" id="jira_issue_link_type" parent="jira_project_menu" action="jira_issue_link_type_action" sequence="5"/>-->
+
+    <record id="jira_issue_link_tree" model="ir.ui.view">
+        <field name="name">jira_issue_link_tree</field>
+        <field name="model">jira.issue.link</field>
+        <field name="arch" type="xml">
+            <tree editable="bottom" edit="0">
+                <field name="jira_id" invisible="1"/>
+                <field name="type_id" attrs="{'readonly': [('jira_id', '!=', False)]}"/>
+                <field name="inward" attrs="{'readonly': [('jira_id', '!=', False)]}"/>
+                <field name="inward_issue_id" attrs="{'readonly': [('jira_id', '!=', False)]}"/>
+                <field name="outward" attrs="{'readonly': [('jira_id', '!=', False)]}"/>
+                <field name="outward_issue_id" attrs="{'readonly': [('jira_id', '!=', False)]}"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="jira_issue_link_action" model="ir.actions.act_window">
+        <field name="name">Issue Link</field>
+        <field name="res_model">jira.issue.link</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <!--<menuitem name="Issue Link" id="jira_issue_link" parent="jira_project_menu" action="jira_issue_link_action" sequence="6"/>-->
+
+</odoo>

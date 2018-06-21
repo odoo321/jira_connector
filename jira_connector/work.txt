@@ -1,0 +1,6 @@
+Wsparcie dla tempo timesheets [done]
+Wysyłanie załączników [done]
+Aktualizowanie powiązancyh zadań [done - czesciowo]
+Domena zależna od tego czy projekt/zadanie jest z jiry
+many2many_tags - przejście do objektu?
+Logowanie zmian

@@ -1,0 +1,17 @@
+<odoo>
+
+    <record id="jira_cron" model="ir.cron">
+        <field name="name">Jira Cron</field>
+        <field name="state">code</field>
+        <field name="model_id" ref="model_jira_settings"/>
+        <field name="active" eval="False"/>
+        <field name="interval_type">days</field>
+        <field name="code">env.ref('jira_connector.jira_settings_record').jira_get_last_day()</field>
+        <field name="numbercall">-1</field>
+    </record>
+
+    <record id="jira_settings_record" model="jira.settings">
+        <field name="cron_id" ref="jira_cron"/>
+    </record>
+
+</odoo>
